@@ -1,0 +1,56 @@
+import requests
+import json
+from base64 import b64encode
+
+# Confluence details
+base_url = "https://your-domain.atlassian.net/wiki"
+space_key = "SPACE"  # Your space key
+username = "your-email@domain.com"
+api_token = "your-api-token"
+
+# Create authentication header
+auth_string = f"{username}:{api_token}"
+auth_bytes = auth_string.encode('ascii')
+auth_b64 = b64encode(auth_bytes).decode('ascii')
+headers = {
+    "Authorization": f"Basic {auth_b64}",
+    "Content-Type": "application/json"
+}
+
+# API endpoint
+api_endpoint = f"{base_url}/rest/api/content"
+
+# Page data
+page_data = {
+    "type": "page",
+    "title": "New Blank Page",
+    "space": {
+        "key": space_key
+    },
+    "body": {
+        "storage": {
+            "value": " ",  # Blank content
+            "representation": "storage"
+        }
+    }
+}
+
+try:
+    # Make POST request
+    response = requests.post(
+        api_endpoint,
+        headers=headers,
+        data=json.dumps(page_data),
+        verify=False
+    )
+    
+    # Check response
+    if response.status_code == 200:
+        print("Page created successfully")
+        print(f"Page ID: {response.json()['id']}")
+    else:
+        print(f"Failed to create page: {response.status_code}")
+        print(response.text)
+
+except Exception as e:
+    print(f"Error: {str(e)}")
