@@ -1,0 +1,48 @@
+import requests
+import json
+
+# Replace with your Confluence credentials
+username = 'your.email@example.com'   # For Atlassian Cloud
+api_token = 'your_api_token'          # API token or password
+
+# Replace with your Confluence base URL
+confluence_base_url = 'https://your-domain.atlassian.net/wiki'  # For Atlassian Cloud
+# confluence_base_url = 'http://localhost:8090'                 # For self-hosted Confluence
+
+api_url = f'{confluence_base_url}/rest/api/content'
+
+# Replace with your space key and desired page title
+space_key = 'SPACE_KEY'
+page_title = 'New Blank Page'
+
+payload = {
+    'type': 'page',
+    'title': page_title,
+    'space': {'key': space_key},
+    'body': {
+        'storage': {
+            'value': '',
+            'representation': 'storage'
+        }
+    }
+}
+
+headers = {
+    'Content-Type': 'application/json'
+}
+
+response = requests.post(
+    api_url,
+    headers=headers,
+    auth=(username, api_token),
+    data=json.dumps(payload)
+)
+
+if response.status_code in [200, 201]:
+    print('Page created successfully!')
+    page_info = response.json()
+    print(f"Page ID: {page_info['id']}")
+    print(f"Page URL: {confluence_base_url}{page_info['_links']['webui']}")
+else:
+    print(f"Failed to create page. Status code: {response.status_code}")
+    print(f"Response: {response.text}")
