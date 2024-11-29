@@ -1,0 +1,63 @@
+import requests
+import json
+from base64 import b64encode
+
+# Confluence details
+base_url = "https://your-domain.atlassian.net/wiki"
+space_key = "SPACE"
+username = "your-email@domain.com"
+api_token = "your-api-token"
+page_id = "123456"  # ID of the page to update
+
+# Create authentication header
+auth_string = f"{username}:{api_token}"
+auth_bytes = auth_string.encode('ascii')
+auth_b64 = b64encode(auth_bytes).decode('ascii')
+headers = {
+    "Authorization": f"Basic {auth_b64}",
+    "Content-Type": "application/json"
+}
+
+# First, get the current version number
+get_url = f"{base_url}/rest/api/content/{page_id}?expand=version"
+try:
+    current_page = requests.get(get_url, headers=headers).json()
+    current_version = current_page['version']['number']
+
+    # Prepare update data
+    update_data = {
+        "type": "page",
+        "title": "Updated Page Title",
+        "space": {
+            "key": space_key
+        },
+        "body": {
+            "storage": {
+                "value": "Updated content goes here",
+                "representation": "storage"
+            }
+        },
+        "version": {
+            "number": current_version + 1  # Increment version
+        }
+    }
+
+    # Make PUT request
+    update_url = f"{base_url}/rest/api/content/{page_id}"
+    response = requests.put(
+        update_url,
+        headers=headers,
+        data=json.dumps(update_data),
+        verify=False
+    )
+
+    # Check response
+    if response.status_code == 200:
+        print("Page updated successfully")
+        print(f"New version: {response.json()['version']['number']}")
+    else:
+        print(f"Failed to update page: {response.status_code}")
+        print(response.text)
+
+except Exception as e:
+    print(f"Error: {str(e)}")
