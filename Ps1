@@ -1,0 +1,6 @@
+$authString = "your-email@domain.com:your-api-token"
+$bytes = [System.Text.Encoding]::UTF8.GetBytes($authString)
+$base64Auth = [Convert]::ToBase64String($bytes)
+$base64Auth
+
+curl -X POST -H "Authorization: Basic <base64Auth>" -H "Content-Type: application/json" -d "{\"type\":\"page\",\"title\":\"New Blank Page\",\"space\":{\"key\":\"SPACE\"},\"body\":{\"storage\":{\"value\":\" \",\"representation\":\"storage\"}}}" https://your-domain.atlassian.net/wiki/rest/api/content
