@@ -1,0 +1,40 @@
+from atlassian import Confluence
+import requests
+
+class BearerTokenConfluence(Confluence):
+    """Extension of Confluence class that uses bearer token authentication"""
+    
+    def __init__(self, url, token, **kwargs):
+        # Initialize with dummy credentials
+        super().__init__(url=url, username='dummy', password='dummy', **kwargs)
+        
+        # Override the session with our custom bearer token session
+        self._session = requests.Session()
+        self._session.headers.update({'Authorization': f'Bearer {token}'})
+        self._session.headers.update({'Content-Type': 'application/json'})
+
+# Example usage
+confluence = BearerTokenConfluence(
+    url='https://your-instance.atlassian.net/wiki',
+    token='your-bearer-token'
+)
+
+# Get source page content
+source_page_id = "123456"
+target_space_key = "TGTSPACE"
+target_parent_id = "789012"  # Optional: ID of parent page
+new_title = "Copied Page Title"  # Optional: New title
+
+source_page = confluence.get_page_by_id(source_page_id, expand='body.storage')
+
+# Create new page with same content
+new_page = confluence.create_page(
+    space=target_space_key,
+    title=new_title or source_page['title'],
+    body=source_page['body']['storage']['value'],
+    parent_id=target_parent_id,
+    representation='storage'
+)
+
+print(f"Page copied successfully. New page ID: {new_page['id']}")
+```
